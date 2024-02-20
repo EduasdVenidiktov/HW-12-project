@@ -1,9 +1,153 @@
-import axios from 'axios';
+import { fetchImages } from './js/pixabay-api';
+import { templateImages } from './js/render-functions';
 
-axios.defaults.baseURL = '<https://jsonplaceholder.typicode.com>';
+import iziToast from 'izitoast';
+import 'izitoast/dist/css/iziToast.min.css';
 
-axios.get('/users').then().catch();
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 
-axios.get('/posts').then().catch();
+// ================ звернення до елементів =================
+const refs = {
+  formEl: document.querySelector('.form'),
+  loadEl: document.querySelector('.loader'),
+  GalleryEl: document.querySelector('.gallery'),
+  loadMore: document.querySelector('.js-btn-load'), // знайшли кнопку loadMore
+};
 
-axios.get('/images').then().catch();
+// ================= додаткові змінні ==============================
+let query;
+let page;
+let maxPage;
+
+// =================================================
+refs.formEl.addEventListener('submit', onFormSubmit);
+refs.loadMore.addEventListener('click', onLoadMore);
+
+// =======================================================
+async function onFormSubmit(ev) {
+  ev.preventDefault();
+  showLoader();
+  query = ev.target.elements.query.value.trim(); // отримання значення input без пробілів
+  // якщо нічого не введено в пошук
+  if (!query) {
+    showError();
+    hiddenLoader();
+    return;
+  }
+
+  page = 1;
+  try {
+    const data = await fetchImages(query, page); // відправлення кур'єра на пошук
+    maxPage = Math.ceil(data.totalHits / 150);
+    //================ якщо не знайдено нічого на сервері =================
+    if (data.hits.length === 0) {
+      ev.target.reset(); // очищення input
+
+      showErrorMessenge();
+      hiddenLoader();
+      return;
+    } else {
+      refs.GalleryEl.innerHTML = ''; // скидання розмітки після submit, але до рендеру
+      renderHits(data.hits);
+    }
+  } catch (error) {
+    showError(error);
+
+    maxPage = 0;
+
+    refs.GalleryEl.innerHTML = ''; // скидання розмітки після
+  }
+  hiddenLoader();
+  checkVisibleStatus();
+
+  ev.target.reset(); // очищення input
+}
+
+// ==================== всі функції =============================================================
+// =============== друга кнопка LoadMore =================
+async function onLoadMore() {
+  page += 1;
+  showLoader();
+  const data = await fetchImages(query, page);
+  renderHits(data.hits);
+  hiddenLoader();
+
+  checkVisibleStatus(); // можна поставити перед page += 1;
+
+  const height =
+    refs.GalleryEl.firstElementChild.getBoundingClientRect().height;
+  scrollBy({
+    behavior: 'smooth',
+    top: height * 2,
+  });
+}
+// ==================================================
+
+function renderHits(hits) {
+  const markup = templateImages(hits);
+  refs.GalleryEl.insertAdjacentHTML('beforeend', markup); // додає нову розмітку
+
+  const lightbox = new SimpleLightbox('.gallery a', {
+    captions: true,
+    captionSelector: 'img',
+    captionType: 'attr',
+    captionsData: 'alt',
+    captionPosition: 'bottom',
+    animation: 250,
+    widthRatio: 0.8,
+    scaleImageToRatio: true,
+  });
+
+  lightbox.refresh();
+}
+
+function checkVisibleStatus() {
+  if (page >= maxPage) {
+    hiddenLoadBtn();
+    showErrorEnd();
+    // hiddenMoreLoader;
+  } else {
+    showLoadBtn();
+  }
+}
+// ==================== errors ===================
+function showError() {
+  iziToast.error({
+    message: 'Please enter a search query.',
+    position: 'topRight',
+  });
+}
+function showErrorMessenge() {
+  iziToast.error({
+    backgroundColor: '#ff0000',
+    position: 'topRight',
+    maxWidth: 500,
+    message:
+      'Sorry, there are no images matching your search query. Please try again!',
+  });
+}
+function showErrorEnd() {
+  iziToast.error({
+    backgroundColor: '#dc143c',
+    message: "We're sorry, but you've reached the end of search results",
+    position: 'bottomCenter',
+  });
+}
+
+// ============= лоудер ====================
+const showLoader = () => {
+  refs.loadEl.classList.remove('hidden'); // показує лоудер після Submit
+};
+
+const hiddenLoader = () => {
+  refs.loadEl.classList.add('hidden'); //ховає лоудер після Submit
+};
+
+// =============== кнопка loadMore ===================
+function showLoadBtn() {
+  refs.loadMore.classList.remove('hidden');
+} //показує кнопку loadMore
+function hiddenLoadBtn() {
+  refs.loadMore.classList.add('hidden');
+} //ховає кнопку loadMore
