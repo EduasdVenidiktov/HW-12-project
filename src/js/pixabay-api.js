@@ -13,7 +13,7 @@ export async function fetchImages(query, currentPage) {
     image_type: 'photo',
     orientation: 'horizontal',
     safesearch: 'true',
-    per_page: 150,
+    per_page: 15,
     page: currentPage,
   };
 

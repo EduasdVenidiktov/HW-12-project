@@ -39,7 +39,7 @@ async function onFormSubmit(ev) {
   page = 1;
   try {
     const data = await fetchImages(query, page); // відправлення кур'єра на пошук
-    maxPage = Math.ceil(data.totalHits / 150);
+    maxPage = Math.ceil(data.totalHits / 15);
     //================ якщо не знайдено нічого на сервері =================
     if (data.hits.length === 0) {
       ev.target.reset(); // очищення input
