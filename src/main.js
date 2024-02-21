@@ -104,7 +104,6 @@ function checkVisibleStatus() {
   if (page >= maxPage) {
     hiddenLoadBtn();
     showErrorEnd();
-    // hiddenMoreLoader;
   } else {
     showLoadBtn();
   }
