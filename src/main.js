@@ -83,24 +83,22 @@ async function onLoadMore() {
   });
 }
 // ==================================================
+const lightbox = new SimpleLightbox('.gallery a', {
+  captions: true,
+  captionSelector: 'img',
+  captionType: 'attr',
+  captionsData: 'alt',
+  captionPosition: 'bottom',
+  animation: 250,
+  widthRatio: 0.8,
+  scaleImageToRatio: true,
+});
 
 function renderHits(hits) {
   const markup = templateImages(hits);
   refs.GalleryEl.insertAdjacentHTML('beforeend', markup); // додає нову розмітку
-
-  const lightbox = new SimpleLightbox('.gallery a', {
-    captions: true,
-    captionSelector: 'img',
-    captionType: 'attr',
-    captionsData: 'alt',
-    captionPosition: 'bottom',
-    animation: 250,
-    widthRatio: 0.8,
-    scaleImageToRatio: true,
-  });
-
-  lightbox.refresh();
 }
+lightbox.refresh();
 
 function checkVisibleStatus() {
   if (page >= maxPage) {
