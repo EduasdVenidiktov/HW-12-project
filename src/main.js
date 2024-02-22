@@ -20,9 +20,18 @@ let query;
 let page;
 let maxPage;
 
-// =================================================
+// =================  прослуховувачі подій  ================================
 refs.formEl.addEventListener('submit', onFormSubmit);
 refs.loadMore.addEventListener('click', onLoadMore);
+
+// ============= лоудер ====================
+const showLoader = () => {
+  refs.loadEl.classList.remove('hidden'); // показує лоудер після Submit
+};
+
+const hiddenLoader = () => {
+  refs.loadEl.classList.add('hidden'); //ховає лоудер після Submit
+};
 
 // =======================================================
 async function onFormSubmit(ev) {
@@ -64,7 +73,6 @@ async function onFormSubmit(ev) {
   ev.target.reset(); // очищення input
 }
 
-// ==================== всі функції =============================================================
 // =============== друга кнопка LoadMore =================
 async function onLoadMore() {
   page += 1;
@@ -83,22 +91,21 @@ async function onLoadMore() {
   });
 }
 // ==================================================
-const lightbox = new SimpleLightbox('.gallery a', {
-  captions: true,
-  captionSelector: 'img',
-  captionType: 'attr',
-  captionsData: 'alt',
-  captionPosition: 'bottom',
-  animation: 250,
-  widthRatio: 0.8,
-  scaleImageToRatio: true,
-});
-
 function renderHits(hits) {
   const markup = templateImages(hits);
   refs.GalleryEl.insertAdjacentHTML('beforeend', markup); // додає нову розмітку
+  const lightbox = new SimpleLightbox('.gallery a', {
+    captions: true,
+    captionSelector: 'img',
+    captionType: 'attr',
+    captionsData: 'alt',
+    captionPosition: 'bottom',
+    animation: 250,
+    widthRatio: 0.8,
+    scaleImageToRatio: true,
+  });
+  lightbox.refresh();
 }
-lightbox.refresh();
 
 function checkVisibleStatus() {
   if (page >= maxPage) {
@@ -131,15 +138,6 @@ function showErrorEnd() {
     position: 'bottomCenter',
   });
 }
-
-// ============= лоудер ====================
-const showLoader = () => {
-  refs.loadEl.classList.remove('hidden'); // показує лоудер після Submit
-};
-
-const hiddenLoader = () => {
-  refs.loadEl.classList.add('hidden'); //ховає лоудер після Submit
-};
 
 // =============== кнопка loadMore ===================
 function showLoadBtn() {
