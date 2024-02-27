@@ -40,6 +40,8 @@ async function onFormSubmit(ev) {
   query = ev.target.elements.query.value.trim(); // отримання значення input без пробілів
   // якщо нічого не введено в пошук
   if (!query) {
+    refs.GalleryEl.innerHTML = ''; // скидання розмітки після submit
+
     showError();
     hiddenLoader();
     return;
@@ -90,7 +92,6 @@ async function onLoadMore() {
     top: height * 2,
   });
 }
-
 
 const lightbox = new SimpleLightbox('.gallery a', {
   captions: true,
